@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+# Открытые снимки Coros остаются только локально. В репозиторий уходит
+# лишь зашифрованный public/coros.enc.json.
+data/
