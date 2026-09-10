@@ -61,7 +61,8 @@ function Gate({ onOk }) {
   return (
     <div className="gate">
       <form className="gate-card" onSubmit={submit}>
-        <h1>Coros Dashboard</h1>
+        <img className="gate-logo" src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
+        <h1>Coros Lospedalny</h1>
         <p>Введите PIN, чтобы открыть данные</p>
         <input
           className="pin-input"
@@ -155,7 +156,7 @@ function Dashboard({ bundle }) {
     <>
       <div className="head">
         <div className="head-inner">
-          <h1>Coros <span className="dot">•</span> Неделя {d.week?.iso?.split("-W")[1] || d.week?.iso}</h1>
+          <h1>Coros Lospedalny <span className="dot">•</span> Неделя {d.week?.iso?.split("-W")[1] || d.week?.iso}</h1>
           <span className="sub">
             {d.week?.start} .. {d.week?.end}
             {"  ·  "}
