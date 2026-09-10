@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
-  ResponsiveContainer, Legend, ReferenceLine,
+  ResponsiveContainer, Legend, ReferenceLine, LabelList,
 } from "recharts";
 import { decryptBundle } from "./crypto.js";
 import { sportRu, hrvStatusRu, loadCommentRu, recoveryLevelRu, coachRu } from "./i18n.js";
@@ -226,7 +226,7 @@ function Dashboard({ bundle }) {
           <Panel cap="Фазы сна по ночам (минуты)">
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sleep} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <BarChart data={sleep} margin={{ top: 24, right: 8, left: -16, bottom: 0 }}>
                   <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                   <XAxis dataKey="date" {...axis} />
                   <YAxis {...axis} />
@@ -234,7 +234,19 @@ function Dashboard({ bundle }) {
                   <Legend wrapperStyle={{ fontSize: 11, color: "#6b7683" }} />
                   <Bar dataKey="deep" stackId="s" fill="#0563c1" name="глубокий" />
                   <Bar dataKey="light" stackId="s" fill="#c3cad2" name="легкий" />
-                  <Bar dataKey="rem" stackId="s" fill="#e85d50" name="REM" />
+                  <Bar dataKey="rem" stackId="s" fill="#e85d50" name="REM">
+                    <LabelList content={(p) => {
+                      const t = sleep[p.index]?.total || 0;
+                      if (!t) return null;
+                      const h = Math.floor(t / 60), m = t % 60;
+                      return (
+                        <text x={p.x + p.width / 2} y={p.y - 6} textAnchor="middle"
+                              fontSize="11" fontWeight="600" fill="#1e2329">
+                          {`${h}ч ${m}м`}
+                        </text>
+                      );
+                    }} />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
