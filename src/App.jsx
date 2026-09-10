@@ -175,6 +175,18 @@ function Dashboard({ bundle }) {
           </div>
         </div>
 
+        {d.insights && (d.insights.lines?.length || d.insights.recommendation) ? (
+          <div className="panel insights-panel">
+            <div className="ins-title">Выводы недели</div>
+            {(d.insights.lines || []).map((l, i) => (
+              <div className="ins-line" key={i}><b>{l.label}:</b> {l.text}</div>
+            ))}
+            {d.insights.recommendation ? (
+              <div className="ins-rec">{d.insights.recommendation}</div>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="kpis">
           <Kpi label="VO2max" value={f.vo2max ?? NA} foot={f.threshold_pace ? `порог ${f.threshold_pace}/км` : null} />
           <Kpi label="Восстановление (Recovery)" value={rec.percent != null ? `${rec.percent}` : NA} unit="%" tone={recTone}

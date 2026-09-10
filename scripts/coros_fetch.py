@@ -197,6 +197,106 @@ def iso_week(d: datetime) -> str:
     return f"{y}-W{w:02d}"
 
 
+_HRV_RU = {"Above normal": "выше нормы", "Normal": "в норме", "Below normal": "ниже нормы"}
+
+
+def _sleep_min(s: str | None) -> int:
+    if not s:
+        return 0
+    h = re.search(r"(\d+)\s*h", s)
+    m = re.search(r"(\d+)\s*min", s)
+    return (int(h.group(1)) * 60 if h else 0) + (int(m.group(1)) if m else 0)
+
+
+def _comma(x) -> str:
+    return str(x).replace(".", ",")
+
+
+def build_insights(snap: dict, now: datetime) -> dict:
+    """Детерминированные выводы недели из метрик. Считаются кодом, поэтому
+    обновляются сами при еженедельном headless-прогоне."""
+    rec = snap.get("recovery") or {}
+    hrv = snap.get("hrv") or []
+    daily = (snap.get("daily") or {}).get("days") or []
+    load = snap.get("training_load") or []
+    ay = snap.get("activities_year") or []
+    lines = []
+
+    rp = rec.get("percent")
+    hstatus = hrv[0]["status"] if hrv else None
+    if rp is not None:
+        if rp >= 75 and (hstatus or "") != "Below normal":
+            verdict = "организм готов к качественной или длинной тренировке"
+        elif rp >= 50:
+            verdict = "умеренная нагрузка, без максимальных усилий"
+        else:
+            verdict = "приоритет восстановлению, лучше отдых или легкое"
+        extra = f", HRV {_HRV_RU.get(hstatus, hstatus)}" if hstatus else ""
+        lines.append({"label": "Готовность",
+                      "text": f"восстановление {int(rp)}%{extra}. Сегодня {verdict}."})
+
+    tots = [_sleep_min((d.get("sleep") or {}).get("total")) for d in daily if d.get("sleep")]
+    avg_sleep = sum(tots) / len(tots) if tots else 0
+    if tots:
+        h = _comma(f"{avg_sleep / 60:.1f}")
+        if avg_sleep < 420:
+            txt = f"в среднем {h} ч, это меньше 7 ч, стоит добавить сна"
+        elif avg_sleep <= 540:
+            txt = f"в среднем {h} ч, в норме"
+        else:
+            txt = f"в среднем {h} ч, много"
+        lines.append({"label": "Сон", "text": txt})
+
+    ratio = load[0]["ratio"] if load else None
+    if ratio is not None:
+        if ratio < 0.8:
+            txt = f"снижена (соотношение {_comma(ratio)}), возможна растренированность"
+        elif ratio <= 1.3:
+            txt = f"сбалансирована (соотношение {_comma(ratio)})"
+        elif ratio <= 1.5:
+            txt = f"растет (соотношение {_comma(ratio)}), следи за восстановлением"
+        else:
+            txt = f"высокая (соотношение {_comma(ratio)}), риск перегрузки"
+        lines.append({"label": "Нагрузка", "text": txt})
+
+    def wk_of(dstr):
+        y, m, d = map(int, dstr.split("-"))
+        return datetime(y, m, d).isocalendar()[1]
+
+    def km_week(wk):
+        tot = 0.0
+        for a in ay:
+            if not a.get("date") or wk_of(a["date"]) != wk:
+                continue
+            st = a.get("sport_type") or 0
+            grp = st // 100
+            if grp not in (1, 2):
+                continue
+            if grp == 2 and a.get("avg_speed") is not None and a["avg_speed"] > 42:
+                continue
+            tot += a.get("distance_km") or 0
+        return tot
+
+    cur_wk = now.isocalendar()[1]
+    tw, lw = km_week(cur_wk), km_week(cur_wk - 1)
+    if tw or lw:
+        trend = "больше" if tw > lw else "меньше" if tw < lw else "столько же"
+        lines.append({"label": "Объем",
+                      "text": f"эта неделя {tw:.0f} км, прошлая {lw:.0f} км ({trend})"})
+
+    rec_line = None
+    if rp is not None:
+        good_load = ratio is None or ratio <= 1.3
+        if rp >= 75 and good_load and avg_sleep >= 420:
+            rec_line = "Хорошее окно для качественной или длинной тренировки."
+        elif rp < 50 or (ratio is not None and ratio > 1.5) or (tots and avg_sleep < 390):
+            rec_line = "Сделай акцент на восстановлении: сон и легкие объемы."
+        else:
+            rec_line = "Поддерживающая неделя: умеренные тренировки, следи за сном."
+
+    return {"lines": lines, "recommendation": rec_line}
+
+
 def main():
     now = datetime.now(timezone.utc)
     week_end = now.date()
@@ -262,6 +362,7 @@ def main():
         "activities": records,
         "activities_year": year_records,
     }
+    snapshot["insights"] = build_insights(snapshot, now)
 
     DATA.mkdir(parents=True, exist_ok=True)
     HISTORY.mkdir(parents=True, exist_ok=True)
