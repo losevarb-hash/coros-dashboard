@@ -286,7 +286,7 @@ function Dashboard({ bundle }) {
 
         {(f.pred_5k || f.pred_10k) && (
           <>
-            <div className="section-title">Прогнозы гонок</div>
+            <div className="section-title">Прогнозы забегов (бег)</div>
             <Panel>
               <div className="pred">
                 {[["5 км", f.pred_5k], ["10 км", f.pred_10k], ["Полумарафон", f.pred_half], ["Марафон", f.pred_marathon]]

@@ -23,6 +23,12 @@ function durToMin(s) {
   if (p.length === 2) return p[0] + p[1] / 60;
   return 0;
 }
+// "7h 22min" -> "7ч 22м"
+const hm = (s) => {
+  if (!s) return s;
+  const h = /(\d+)\s*h/.exec(s), m = /(\d+)\s*min/.exec(s);
+  return `${h ? +h[1] : 0}ч ${m ? +m[1] : 0}м`;
+};
 const isRun = (st) => st != null && Math.floor(st / 100) === 1;
 const isBike = (st) => st != null && Math.floor(st / 100) === 2;
 // велозаезд с правдоподобной средней (иначе GPS-глюки Coros раздувают километраж)
@@ -264,7 +270,7 @@ export default function Insights({ bundle }) {
               {selHealth ? (
                 <div className="cal-health">
                   {selHealth.steps != null ? `Шаги ${selHealth.steps.toLocaleString("ru-RU")}` : ""}
-                  {selHealth.sleep ? `  ·  Сон ${selHealth.sleep.total}` : ""}
+                  {selHealth.sleep ? `  ·  Сон ${hm(selHealth.sleep.total)}` : ""}
                 </div>
               ) : <div className="cal-health muted">Данных о здоровье за этот день нет</div>}
             </>
@@ -276,15 +282,15 @@ export default function Insights({ bundle }) {
         <Panel title="Объем по неделям" cap="Километраж бег и вело">
           <div className="chart-h">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={byWeek} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <BarChart data={byWeek} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                 <XAxis dataKey="wk" {...axis} interval="preserveStartEnd" />
                 <YAxis {...axis} />
                 <Tooltip {...tip} />
-                <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-                <Line type="monotone" dataKey="bike" stroke="#0563c1" strokeWidth={2} dot={false} name="вело" />
-                <Line type="monotone" dataKey="run" stroke="#e85d50" strokeWidth={2} dot={false} name="бег" />
-              </LineChart>
+                <Legend wrapperStyle={{ fontSize: 11, color: "#6b7683" }} />
+                <Bar dataKey="bike" stackId="v" fill="#0563c1" name="вело" />
+                <Bar dataKey="run" stackId="v" fill="#e85d50" name="бег" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </Panel>
