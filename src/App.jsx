@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, Legend, ReferenceLine,
 } from "recharts";
 import { decryptBundle } from "./crypto.js";
+import { sportRu, hrvStatusRu, loadCommentRu, recoveryLevelRu, coachRu } from "./i18n.js";
 
 // ---------- helpers ----------
 const NA = String.fromCharCode(0x2014);
@@ -93,6 +94,24 @@ function Kpi({ label, value, unit, foot, tone }) {
   );
 }
 
+function CoachBlock({ text, sport }) {
+  const c = coachRu(text, { sport });
+  if (!c) return null;
+  return (
+    <div className="act-coach">
+      <div className="coach-line"><b>Вывод:</b> {c.conclusion}</div>
+      {c.findings.length ? (
+        <ul className="coach-list">
+          {c.findings.map((x, i) => <li key={i}>{x}</li>)}
+        </ul>
+      ) : null}
+      {c.recommendation ? (
+        <div className="coach-line"><b>Рекомендация:</b> {c.recommendation}</div>
+      ) : null}
+    </div>
+  );
+}
+
 function Panel({ cap, children }) {
   return (
     <div className="panel">
@@ -149,15 +168,15 @@ function Dashboard({ bundle }) {
       <div className="wrap">
         <div className="kpis">
           <Kpi label="VO2max" value={f.vo2max ?? NA} foot={f.threshold_pace ? `порог ${f.threshold_pace}/км` : null} />
-          <Kpi label="Восстановление" value={rec.percent != null ? `${rec.percent}` : NA} unit="%" tone={recTone}
-               foot={rec.level} />
-          <Kpi label="Пульс покоя" value={d.daily?.resting_hr ?? NA} unit="уд/мин" />
-          <Kpi label="HRV сна" value={latestHrv ? latestHrv.avg : NA} unit="мс"
-               foot={latestHrv ? latestHrv.status : null}
+          <Kpi label="Восстановление (Recovery)" value={rec.percent != null ? `${rec.percent}` : NA} unit="%" tone={recTone}
+               foot={recoveryLevelRu(rec.level)} />
+          <Kpi label="Пульс покоя (Resting HR)" value={d.daily?.resting_hr ?? NA} unit="уд/мин" />
+          <Kpi label="HRV сна (Sleep HRV)" value={latestHrv ? latestHrv.avg : NA} unit="мс"
+               foot={latestHrv ? hrvStatusRu(latestHrv.status) : null}
                tone={latestHrv && latestHrv.avg >= latestHrv.high ? "var(--green)" : null} />
-          <Kpi label="Средний сон" value={avgSleep ? fmtH(avgSleep) : NA} foot={`${sleep.length} ночей`} />
+          <Kpi label="Средний сон (Sleep)" value={avgSleep ? fmtH(avgSleep) : NA} foot={`${sleep.length} ночей`} />
           <Kpi label="Тренировок" value={acts.length}
-               foot={weekLoad ? `нагрузка ${weekLoad.comment}` : null} />
+               foot={weekLoad ? `нагрузка: ${loadCommentRu(weekLoad.comment)}` : null} />
         </div>
 
         <div className="section-title">Готовность и нагрузка</div>
@@ -176,7 +195,7 @@ function Dashboard({ bundle }) {
               </ResponsiveContainer>
             </div>
           </Panel>
-          <Panel cap="Тренировочная нагрузка: короткая vs длинная">
+          <Panel cap="Тренировочная нагрузка: короткая и длинная">
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={load} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -251,7 +270,7 @@ function Dashboard({ bundle }) {
             <div className="act" key={i}>
               <div className="act-top">
                 <div>
-                  <div className="act-sport">{a.sport}</div>
+                  <div className="act-sport">{sportRu(a.sport)}</div>
                   {a.location ? <div className="act-loc">{a.location}</div> : null}
                 </div>
                 <div className="act-date">{a.date}</div>
@@ -264,7 +283,7 @@ function Dashboard({ bundle }) {
                 {a.avg_hr != null && <div className="act-stat"><b>{a.avg_hr}</b><span>пульс</span></div>}
                 {a.calories != null && <div className="act-stat"><b>{a.calories}</b><span>ккал</span></div>}
               </div>
-              {a.coach ? <div className="act-coach">{a.coach}</div> : null}
+              <CoachBlock text={a.coach} sport={a.sport} />
             </div>
           ))}
         </div>

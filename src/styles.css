@@ -82,7 +82,11 @@ body {
 .act-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
 .act-stat b { font-size: 15px; }
 .act-stat span { color: var(--muted); font-size: 11px; display: block; text-transform: uppercase; letter-spacing: .03em; }
-.act-coach { font-size: 12.5px; line-height: 1.5; color: var(--muted); white-space: pre-wrap; border-top: 1px solid var(--line); padding-top: 10px; }
+.act-coach { font-size: 12.5px; line-height: 1.5; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.coach-line { margin: 0 0 6px; }
+.coach-line b { color: var(--text); font-weight: 600; }
+.coach-list { margin: 6px 0; padding-left: 16px; }
+.coach-list li { margin: 2px 0; }
 
 .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
 .pill.green { background: rgba(56,211,159,.15); color: var(--green); }
