@@ -24,6 +24,8 @@ function durToMin(s) {
 }
 const isRun = (st) => st != null && Math.floor(st / 100) === 1;
 const isBike = (st) => st != null && Math.floor(st / 100) === 2;
+// велозаезд с правдоподобной средней (иначе GPS-глюки Coros раздувают километраж)
+const bikeOk = (a) => isBike(a.sport_type) && (a.avg_speed == null || a.avg_speed <= 42);
 const km = (a) => a.distance_km || 0;
 const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -61,7 +63,7 @@ export default function Insights({ bundle }) {
       if (!a.date) continue;
       const m = +a.date.slice(5, 7) - 1;
       if (isRun(a.sport_type)) { rY += km(a); if (m === curMonth) rM += km(a); }
-      if (isBike(a.sport_type)) { bY += km(a); if (m === curMonth) bM += km(a); }
+      if (bikeOk(a)) { bY += km(a); if (m === curMonth) bM += km(a); }
     }
     return { rM, bM, rY, bY };
   }, [year, curMonth]);
@@ -73,7 +75,7 @@ export default function Insights({ bundle }) {
       const m = +a.date.slice(5, 7) - 1;
       if (m > curMonth) continue;
       if (isRun(a.sport_type)) arr[m].run += km(a);
-      if (isBike(a.sport_type)) arr[m].bike += km(a);
+      if (bikeOk(a)) arr[m].bike += km(a);
     }
     return arr.map((x) => ({ ...x, run: round1(x.run), bike: round1(x.bike) }));
   }, [year, curMonth]);
@@ -90,7 +92,7 @@ export default function Insights({ bundle }) {
       if (!map.has(key)) map.set(key, { wk: `W${wk}`, run: 0, bike: 0, sort: wk });
       const o = map.get(key);
       if (isRun(a.sport_type)) o.run += km(a);
-      if (isBike(a.sport_type)) o.bike += km(a);
+      if (bikeOk(a)) o.bike += km(a);
     }
     return [...map.values()].sort((x, y) => x.sort - y.sort)
       .map((x) => ({ ...x, run: round1(x.run), bike: round1(x.bike) }));
