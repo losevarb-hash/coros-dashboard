@@ -42,11 +42,11 @@ function Panel({ title, cap, children }) {
   );
 }
 
-function Vol({ label, value, tone }) {
+function Vol({ label, value, unit = "км", tone }) {
   return (
     <div className="kpi">
       <div className="label">{label}</div>
-      <div className="value" style={tone ? { color: tone } : null}>{value}<span className="unit">км</span></div>
+      <div className="value" style={tone ? { color: tone } : null}>{value}<span className="unit">{unit}</span></div>
     </div>
   );
 }
@@ -59,14 +59,16 @@ export default function Insights({ bundle }) {
 
   // ---- объемы: месяц и год ----
   const vol = useMemo(() => {
-    let rM = 0, bM = 0, rY = 0, bY = 0;
+    let rM = 0, bM = 0, rY = 0, bY = 0, eM = 0, eY = 0;
     for (const a of year) {
       if (!a.date) continue;
       const m = +a.date.slice(5, 7) - 1;
       if (isRun(a.sport_type)) { rY += km(a); if (m === curMonth) rM += km(a); }
       if (bikeOk(a)) { bY += km(a); if (m === curMonth) bM += km(a); }
+      const el = a.elevation || 0;
+      eY += el; if (m === curMonth) eM += el;
     }
-    return { rM, bM, rY, bY };
+    return { rM, bM, rY, bY, eM, eY };
   }, [year, curMonth]);
 
   // ---- помесячные объемы бег/вело ----
@@ -207,6 +209,8 @@ export default function Insights({ bundle }) {
         <Vol label="Вело, этот месяц" value={nf(round1(vol.bM))} tone="var(--blue)" />
         <Vol label="Бег, год" value={nf(round1(vol.rY))} tone="var(--accent)" />
         <Vol label="Вело, год" value={nf(round1(vol.bY))} tone="var(--blue)" />
+        <Vol label="Набор высоты, месяц" value={Math.round(vol.eM).toLocaleString("ru-RU")} unit="м" tone="var(--slate)" />
+        <Vol label="Набор высоты, год" value={Math.round(vol.eY).toLocaleString("ru-RU")} unit="м" tone="var(--slate)" />
       </div>
       <Panel cap="Километраж по месяцам">
         <div className="chart-h">

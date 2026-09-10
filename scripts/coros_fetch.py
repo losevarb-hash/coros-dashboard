@@ -220,6 +220,34 @@ def main():
         "limit": 500,
     }))
 
+    # набор высоты по каждому заезду. Высота есть только в детали, поэтому
+    # кэшируем ее по label_id в data/elevation_cache.json: первый прогон
+    # добирает всю историю, дальше деталь дергается только для новых заездов.
+    DATA.mkdir(parents=True, exist_ok=True)
+    elev_path = DATA / "elevation_cache.json"
+    elev_cache = json.loads(elev_path.read_text()) if elev_path.exists() else {}
+    fetched = 0
+    for r in year_records:
+        lid, st = r.get("label_id"), r.get("sport_type")
+        if not lid or st is None:
+            continue
+        if lid in elev_cache:
+            r["elevation"] = elev_cache[lid]
+            continue
+        try:
+            detail = call_tool("getActivityDetail", {"labelId": lid, "sportType": st})
+            mm = re.search(r"Elevation Gain\s*/\s*Loss:\s*([\d.]+)\s*m", detail)
+            elev = float(mm.group(1)) if mm else 0.0
+        except Exception:
+            elev = None
+        r["elevation"] = elev
+        if elev is not None:
+            elev_cache[lid] = elev
+        fetched += 1
+        if fetched % 25 == 0:  # периодически сохраняем прогресс
+            elev_path.write_text(json.dumps(elev_cache, ensure_ascii=False))
+    elev_path.write_text(json.dumps(elev_cache, ensure_ascii=False))
+
     snapshot = {
         "schema": 1,
         "generated_at": now.isoformat(),
