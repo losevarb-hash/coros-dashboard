@@ -120,7 +120,7 @@ body {
   position: relative; border-radius: 14px; overflow: hidden; margin-bottom: 22px;
   border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(30,35,41,.08);
 }
-.hero img { display: block; width: 100%; height: 260px; object-fit: cover; object-position: center 32%; }
+.hero img { display: block; width: 100%; height: 300px; object-fit: cover; object-position: center 12%; }
 .hero-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(90deg, rgba(20,24,28,.72) 0%, rgba(20,24,28,.28) 45%, rgba(20,24,28,0) 70%);
