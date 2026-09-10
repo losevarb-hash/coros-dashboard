@@ -1,18 +1,19 @@
 import React, { useMemo, useState } from "react";
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, LineChart, Line,
   XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend,
 } from "recharts";
 import { sportRu } from "./i18n.js";
 
+const nf = (n) => (n == null ? n : String(n).replace(".", ","));
 const tip = {
-  contentStyle: { background: "#1f2630", border: "1px solid #2a323d", borderRadius: 8, color: "#e6edf3", fontSize: 12 },
-  labelStyle: { color: "#93a1b1" },
+  contentStyle: { background: "#fff", border: "1px solid #e3e6ea", borderRadius: 8, color: "#1e2329", fontSize: 12, boxShadow: "0 2px 8px rgba(30,35,41,.1)" },
+  labelStyle: { color: "#6b7683" },
 };
-const axis = { stroke: "#93a1b1", fontSize: 11 };
+const axis = { stroke: "#6b7683", fontSize: 11 };
 const MONTHS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 const WD = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-const PIE_COLORS = ["#ff6b52", "#4aa8ff", "#38d39f", "#f2c14e", "#a78bfa", "#f472b6", "#93a1b1"];
+const PIE_COLORS = ["#e85d50", "#0563c1", "#2ecc71", "#e8a33d", "#a78bfa", "#f472b6", "#93a1b1"];
 
 // парс "1:16:45" или "42:15" в минуты
 function durToMin(s) {
@@ -89,7 +90,7 @@ export default function Insights({ bundle }) {
       d.setDate(d.getDate() + 4 - (d.getDay() || 7));
       const wk = Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
       const key = `${a.date.slice(5, 7)}/${String(wk).padStart(2, "0")}`;
-      if (!map.has(key)) map.set(key, { wk: `W${wk}`, run: 0, bike: 0, sort: wk });
+      if (!map.has(key)) map.set(key, { wk: `${wk}`, run: 0, bike: 0, sort: wk });
       const o = map.get(key);
       if (isRun(a.sport_type)) o.run += km(a);
       if (bikeOk(a)) o.bike += km(a);
@@ -105,7 +106,7 @@ export default function Insights({ bundle }) {
       const h = durToMin(a.duration) / 60;
       map.set(a.sport, (map.get(a.sport) || 0) + h);
     }
-    return [...map.entries()].map(([s, h]) => ({ name: sportRu(s), hours: round1(h) }))
+    return [...map.entries()].map(([s, h]) => ({ short: sportRu(s).split(" (")[0], hours: round1(h) }))
       .sort((x, y) => y.hours - x.hours);
   }, [year]);
 
@@ -142,7 +143,7 @@ export default function Insights({ bundle }) {
       seen.add(iso);
       const hrvs = (s.hrv || []).map((h) => h.avg).filter(Boolean);
       out.push({
-        wk: iso.replace(/^\d+-/, ""),
+        wk: iso.replace(/^\d+-W?/, ""),
         vo2max: s.fitness?.vo2max ?? null,
         resting: s.daily?.resting_hr ?? null,
         hrv: hrvs.length ? round1(hrvs.reduce((a, b) => a + b, 0) / hrvs.length) : null,
@@ -202,22 +203,22 @@ export default function Insights({ bundle }) {
     <>
       <div className="section-title">Объемы</div>
       <div className="kpis">
-        <Vol label="Бег, этот месяц" value={round1(vol.rM)} tone="var(--accent)" />
-        <Vol label="Вело, этот месяц" value={round1(vol.bM)} tone="var(--blue)" />
-        <Vol label="Бег, год" value={round1(vol.rY)} tone="var(--accent)" />
-        <Vol label="Вело, год" value={round1(vol.bY)} tone="var(--blue)" />
+        <Vol label="Бег, этот месяц" value={nf(round1(vol.rM))} tone="var(--accent)" />
+        <Vol label="Вело, этот месяц" value={nf(round1(vol.bM))} tone="var(--blue)" />
+        <Vol label="Бег, год" value={nf(round1(vol.rY))} tone="var(--accent)" />
+        <Vol label="Вело, год" value={nf(round1(vol.bY))} tone="var(--blue)" />
       </div>
       <Panel cap="Километраж по месяцам">
         <div className="chart-h">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={byMonth} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+              <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
               <XAxis dataKey="m" {...axis} />
               <YAxis {...axis} />
               <Tooltip {...tip} />
               <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-              <Bar dataKey="bike" fill="#4aa8ff" name="вело" />
-              <Bar dataKey="run" fill="#ff6b52" name="бег" />
+              <Bar dataKey="bike" fill="#0563c1" name="вело" />
+              <Bar dataKey="run" fill="#e85d50" name="бег" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -251,7 +252,7 @@ export default function Insights({ bundle }) {
               {selActs.length ? selActs.map((a, i) => (
                 <div key={i} className="cal-act">
                   <b>{sportRu(a.sport)}</b>
-                  <span>{[a.distance_km != null ? `${a.distance_km} км` : null, a.duration,
+                  <span>{[a.distance_km != null ? `${nf(a.distance_km)} км` : null, a.duration,
                     a.avg_hr != null ? `${a.avg_hr} уд/мин` : null,
                     a.calories != null ? `${a.calories} ккал` : null].filter(Boolean).join("  ·  ")}</span>
                 </div>
@@ -272,13 +273,13 @@ export default function Insights({ bundle }) {
           <div className="chart-h">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={byWeek} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+                <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                 <XAxis dataKey="wk" {...axis} interval="preserveStartEnd" />
                 <YAxis {...axis} />
                 <Tooltip {...tip} />
                 <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-                <Line type="monotone" dataKey="bike" stroke="#4aa8ff" strokeWidth={2} dot={false} name="вело" />
-                <Line type="monotone" dataKey="run" stroke="#ff6b52" strokeWidth={2} dot={false} name="бег" />
+                <Line type="monotone" dataKey="bike" stroke="#0563c1" strokeWidth={2} dot={false} name="вело" />
+                <Line type="monotone" dataKey="run" stroke="#e85d50" strokeWidth={2} dot={false} name="бег" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -286,12 +287,13 @@ export default function Insights({ bundle }) {
         <Panel title="Время по видам спорта" cap="Часы за год">
           <div className="chart-h">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={bySport} dataKey="hours" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(e) => `${e.name.split(" (")[0]} ${e.hours}ч`} labelLine={false}>
-                  {bySport.map((e, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Tooltip {...tip} formatter={(v) => `${v} ч`} />
-              </PieChart>
+              <BarChart data={bySport} layout="vertical" margin={{ top: 4, right: 20, left: 8, bottom: 0 }}>
+                <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" {...axis} />
+                <YAxis type="category" dataKey="short" width={132} tick={{ fontSize: 10, fill: "#6b7683" }} stroke="#6b7683" />
+                <Tooltip {...tip} formatter={(v) => `${nf(v)} ч`} />
+                <Bar dataKey="hours" fill="#e85d50" radius={[0, 4, 4, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </Panel>
@@ -300,10 +302,10 @@ export default function Insights({ bundle }) {
       <div className="section-title">Рекорды года</div>
       <div className="panel">
         <div className="pred">
-          {records.longestBike && <div><div className="p-lab">Самый длинный заезд</div><div className="p-val">{records.longestBike.distance_km} км</div></div>}
-          {records.longestRun && <div><div className="p-lab">Самый длинный бег</div><div className="p-val">{records.longestRun.distance_km} км</div></div>}
+          {records.longestBike && <div><div className="p-lab">Самый длинный заезд</div><div className="p-val">{nf(records.longestBike.distance_km)} км</div></div>}
+          {records.longestRun && <div><div className="p-lab">Самый длинный бег</div><div className="p-val">{nf(records.longestRun.distance_km)} км</div></div>}
           {records.fastestRun && <div><div className="p-lab">Быстрый бег (темп)</div><div className="p-val">{records.fastestRun.avg_pace} /км</div></div>}
-          {records.topSpeed && <div><div className="p-lab">Макс. средняя скорость</div><div className="p-val">{records.topSpeed.avg_speed} км/ч</div></div>}
+          {records.topSpeed && <div><div className="p-lab">Макс. средняя скорость</div><div className="p-val">{nf(records.topSpeed.avg_speed)} км/ч</div></div>}
           {records.mostKcal && <div><div className="p-lab">Больше всего калорий</div><div className="p-val">{records.mostKcal.calories} ккал</div></div>}
         </div>
       </div>
@@ -312,14 +314,14 @@ export default function Insights({ bundle }) {
         <div className="chart-h">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={form} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+              <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
               <XAxis dataKey="wk" {...axis} />
               <YAxis {...axis} />
               <Tooltip {...tip} />
               <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-              <Line type="monotone" dataKey="vo2max" stroke="#38d39f" strokeWidth={2} name="VO2max" connectNulls />
-              <Line type="monotone" dataKey="resting" stroke="#f2c14e" strokeWidth={2} name="пульс покоя" connectNulls />
-              <Line type="monotone" dataKey="hrv" stroke="#ff6b52" strokeWidth={2} name="HRV" connectNulls />
+              <Line type="monotone" dataKey="vo2max" stroke="#2ecc71" strokeWidth={2} name="VO2max" connectNulls />
+              <Line type="monotone" dataKey="resting" stroke="#e8a33d" strokeWidth={2} name="пульс покоя" connectNulls />
+              <Line type="monotone" dataKey="hrv" stroke="#e85d50" strokeWidth={2} name="HRV" connectNulls />
             </LineChart>
           </ResponsiveContainer>
         </div>

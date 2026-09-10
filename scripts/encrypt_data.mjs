@@ -24,7 +24,7 @@ const KEY_LEN = 32; // AES-256
 const SALT_LEN = 16;
 const IV_LEN = 12; // GCM nonce
 
-const pin = process.env.COROS_PIN || "4832";
+const pin = process.env.COROS_PIN || "0000";
 
 const latest = JSON.parse(readFileSync(join(DATA, "latest.json"), "utf-8"));
 const history = [];

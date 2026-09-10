@@ -21,11 +21,12 @@ function durMin(s) {
 }
 const fmtH = (min) => `${Math.floor(min / 60)}ч ${min % 60}м`;
 
+const nf = (n) => (n == null ? n : String(n).replace(".", ","));
 const tip = {
-  contentStyle: { background: "#1f2630", border: "1px solid #2a323d", borderRadius: 8, color: "#e6edf3", fontSize: 12 },
-  labelStyle: { color: "#93a1b1" },
+  contentStyle: { background: "#fff", border: "1px solid #e3e6ea", borderRadius: 8, color: "#1e2329", fontSize: 12, boxShadow: "0 2px 8px rgba(30,35,41,.1)" },
+  labelStyle: { color: "#6b7683" },
 };
-const axis = { stroke: "#93a1b1", fontSize: 11 };
+const axis = { stroke: "#6b7683", fontSize: 11 };
 
 // ---------- PIN gate ----------
 function Gate({ onOk }) {
@@ -106,9 +107,6 @@ function CoachBlock({ text, sport }) {
           {c.findings.map((x, i) => <li key={i}>{x}</li>)}
         </ul>
       ) : null}
-      {c.recommendation ? (
-        <div className="coach-line"><b>Рекомендация:</b> {c.recommendation}</div>
-      ) : null}
     </div>
   );
 }
@@ -157,7 +155,7 @@ function Dashboard({ bundle }) {
     <>
       <div className="head">
         <div className="head-inner">
-          <h1>Coros <span className="dot">•</span> Неделя {d.week?.iso}</h1>
+          <h1>Coros <span className="dot">•</span> Неделя {d.week?.iso?.split("-W")[1] || d.week?.iso}</h1>
           <span className="sub">
             {d.week?.start} .. {d.week?.end}
             {"  ·  "}
@@ -167,6 +165,15 @@ function Dashboard({ bundle }) {
       </div>
 
       <div className="wrap">
+        <div className="hero">
+          <img src={`${import.meta.env.BASE_URL}hero.jpg`} alt="" />
+          <div className="hero-overlay">
+            <div className="hero-bar" />
+            <h2>Тренировки и форма</h2>
+            <div className="hero-sub">Coros DURA и APEX 4</div>
+          </div>
+        </div>
+
         <div className="kpis">
           <Kpi label="VO2max" value={f.vo2max ?? NA} foot={f.threshold_pace ? `порог ${f.threshold_pace}/км` : null} />
           <Kpi label="Восстановление (Recovery)" value={rec.percent != null ? `${rec.percent}` : NA} unit="%" tone={recTone}
@@ -186,12 +193,12 @@ function Dashboard({ bundle }) {
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={hrv} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                   <XAxis dataKey="date" {...axis} />
                   <YAxis domain={["dataMin - 5", "dataMax + 5"]} {...axis} />
                   <Tooltip {...tip} />
-                  <Line type="monotone" dataKey="baseline" stroke="#93a1b1" strokeDasharray="4 4" dot={false} name="базовая" />
-                  <Line type="monotone" dataKey="avg" stroke="#ff6b52" strokeWidth={2} dot={{ r: 3 }} name="HRV" />
+                  <Line type="monotone" dataKey="baseline" stroke="#6b7683" strokeDasharray="4 4" dot={false} name="базовая" />
+                  <Line type="monotone" dataKey="avg" stroke="#e85d50" strokeWidth={2} dot={{ r: 3 }} name="HRV" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -200,13 +207,13 @@ function Dashboard({ bundle }) {
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={load} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                   <XAxis dataKey="date" {...axis} />
                   <YAxis {...axis} />
                   <Tooltip {...tip} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-                  <Line type="monotone" dataKey="short" stroke="#4aa8ff" strokeWidth={2} dot={false} name="короткая" />
-                  <Line type="monotone" dataKey="long" stroke="#38d39f" strokeWidth={2} dot={false} name="длинная" />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "#6b7683" }} />
+                  <Line type="monotone" dataKey="short" stroke="#0563c1" strokeWidth={2} dot={false} name="короткая" />
+                  <Line type="monotone" dataKey="long" stroke="#2ecc71" strokeWidth={2} dot={false} name="длинная" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -219,14 +226,14 @@ function Dashboard({ bundle }) {
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={sleep} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                   <XAxis dataKey="date" {...axis} />
                   <YAxis {...axis} />
                   <Tooltip {...tip} formatter={(v) => fmtH(v)} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: "#93a1b1" }} />
-                  <Bar dataKey="deep" stackId="s" fill="#4aa8ff" name="глубокий" />
-                  <Bar dataKey="light" stackId="s" fill="#3b4a5e" name="легкий" />
-                  <Bar dataKey="rem" stackId="s" fill="#ff6b52" name="REM" />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "#6b7683" }} />
+                  <Bar dataKey="deep" stackId="s" fill="#0563c1" name="глубокий" />
+                  <Bar dataKey="light" stackId="s" fill="#c3cad2" name="легкий" />
+                  <Bar dataKey="rem" stackId="s" fill="#e85d50" name="REM" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -235,15 +242,15 @@ function Dashboard({ bundle }) {
             <div className="chart-h">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sleep} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid stroke="#2a323d" strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#e3e6ea" strokeDasharray="3 3" />
                   <XAxis dataKey="date" {...axis} />
                   <YAxis domain={["dataMin - 3", "dataMax + 3"]} {...axis} />
                   <Tooltip {...tip} />
                   {d.daily?.resting_hr ? (
-                    <ReferenceLine y={d.daily.resting_hr} stroke="#93a1b1" strokeDasharray="4 4"
-                                   label={{ value: "покой", fill: "#93a1b1", fontSize: 10, position: "insideTopRight" }} />
+                    <ReferenceLine y={d.daily.resting_hr} stroke="#6b7683" strokeDasharray="4 4"
+                                   label={{ value: "покой", fill: "#6b7683", fontSize: 10, position: "insideTopRight" }} />
                   ) : null}
-                  <Line type="monotone" dataKey="hr" stroke="#38d39f" strokeWidth={2} dot={{ r: 3 }} name="пульс сна" />
+                  <Line type="monotone" dataKey="hr" stroke="#2ecc71" strokeWidth={2} dot={{ r: 3 }} name="пульс сна" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -279,9 +286,9 @@ function Dashboard({ bundle }) {
                 <div className="act-date">{a.date}</div>
               </div>
               <div className="act-stats">
-                {a.distance_km != null && <div className="act-stat"><b>{a.distance_km}</b><span>км</span></div>}
+                {a.distance_km != null && <div className="act-stat"><b>{nf(a.distance_km)}</b><span>км</span></div>}
                 {a.duration && <div className="act-stat"><b>{a.duration}</b><span>время</span></div>}
-                {a.avg_speed != null && <div className="act-stat"><b>{a.avg_speed}</b><span>км/ч</span></div>}
+                {a.avg_speed != null && <div className="act-stat"><b>{nf(a.avg_speed)}</b><span>км/ч</span></div>}
                 {a.avg_pace && <div className="act-stat"><b>{a.avg_pace}</b><span>темп/км</span></div>}
                 {a.avg_hr != null && <div className="act-stat"><b>{a.avg_hr}</b><span>пульс</span></div>}
                 {a.calories != null && <div className="act-stat"><b>{a.calories}</b><span>ккал</span></div>}

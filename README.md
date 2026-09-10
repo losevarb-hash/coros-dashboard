@@ -45,4 +45,4 @@ node scripts/encrypt_data.mjs
 npm run build && npm run preview
 ```
 
-PIN по умолчанию 4832 (env `COROS_PIN`).
+PIN по умолчанию 0000 (env `COROS_PIN`).

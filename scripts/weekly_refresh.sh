@@ -18,7 +18,7 @@ LOG="$REPO/refresh.log"
 echo "=== $(date '+%Y-%m-%d %H:%M:%S') refresh start ===" >> "$LOG"
 
 python3 scripts/coros_fetch.py            >> "$LOG" 2>&1
-COROS_PIN="${COROS_PIN:-4832}" node scripts/encrypt_data.mjs >> "$LOG" 2>&1
+COROS_PIN="${COROS_PIN:-0000}" node scripts/encrypt_data.mjs >> "$LOG" 2>&1
 
 git add public/coros.enc.json
 if git diff --cached --quiet; then
