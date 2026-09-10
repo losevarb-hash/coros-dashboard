@@ -11,7 +11,11 @@ const SPORTS = {
   "Bike": "Велосипед (Bike)",
   "Cycling": "Велосипед (Cycling)",
   "Indoor Bike": "Велостанок (Indoor Bike)",
+  "Indoor Cycling": "Велостанок (Indoor Cycling)",
   "Mountain Bike": "МТБ (Mountain Bike)",
+  "Gym Cardio": "Кардио в зале (Gym Cardio)",
+  "Custom Indoor Other": "Другое в зале (Custom Indoor Other)",
+  "Gym Class": "Групповая (Gym Class)",
   "Strength": "Силовая (Strength)",
   "Yoga": "Йога (Yoga)",
   "Hike": "Поход (Hike)",
@@ -45,6 +49,9 @@ const RECOVERY_LEVEL = {
   "Low intensity training recommended": "Рекомендована низкая интенсивность",
   "Rest recommended": "Рекомендован отдых",
   "Fully recovered": "Полностью восстановлен",
+  "Heavy training allowed": "Допустима тяжелая нагрузка",
+  "Hard training allowed": "Допустима высокая нагрузка",
+  "Light training recommended": "Рекомендована легкая нагрузка",
 };
 
 const RECOMMENDATION = {

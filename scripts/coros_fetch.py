@@ -212,6 +212,14 @@ def main():
             except Exception as e:
                 r["coach"] = f"(разбор недоступен: {e})"
 
+    # добор истории тренировок за текущий год (без тренерского разбора):
+    # питает календарь, месячные/годовые объемы, рекорды и тренд по неделям.
+    year_records = parse_sport_records(call_tool("querySportRecords", {
+        "startDate": f"{now.year}0101",
+        "endDate": now.strftime("%Y%m%d"),
+        "limit": 500,
+    }))
+
     snapshot = {
         "schema": 1,
         "generated_at": now.isoformat(),
@@ -224,6 +232,7 @@ def main():
         "hrv": parse_hrv(call_tool("querySleepHrv")),
         "daily": parse_daily(call_tool("queryDailyHealthData")),
         "activities": records,
+        "activities_year": year_records,
     }
 
     DATA.mkdir(parents=True, exist_ok=True)

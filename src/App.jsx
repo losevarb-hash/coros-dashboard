@@ -5,6 +5,7 @@ import {
 } from "recharts";
 import { decryptBundle } from "./crypto.js";
 import { sportRu, hrvStatusRu, loadCommentRu, recoveryLevelRu, coachRu } from "./i18n.js";
+import Insights from "./insights.jsx";
 
 // ---------- helpers ----------
 const NA = String.fromCharCode(0x2014);
@@ -248,6 +249,8 @@ function Dashboard({ bundle }) {
             </div>
           </Panel>
         </div>
+
+        <Insights bundle={bundle} />
 
         {(f.pred_5k || f.pred_10k) && (
           <>
